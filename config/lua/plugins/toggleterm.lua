@@ -2,6 +2,10 @@ return {
   {
       'akinsho/toggleterm.nvim', 
       version = "*", 
-      config = true
+      event = "ColorScheme",
+      config = function()
+          local highlights = require("rose-pine.plugins.toggleterm")
+          require("toggleterm").setup({highlights = highlights})
+      end
   }
 }

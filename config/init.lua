@@ -24,7 +24,10 @@ vim.keymap.set({"i", "n", "t"}, "<A-j>", "<C-\\><C-n><C-w>j")
 vim.keymap.set({"i", "n", "t"}, "<A-k>", "<C-\\><C-n><C-w>k")
 vim.keymap.set({"i", "n", "t"}, "<A-l>", "<C-\\><C-n><C-w>l")
 
-vim.keymap.set("n", "<C-k>", ":Neotree toggle reveal<cr>")
+vim.keymap.set("n", "<C-k>", function() vim.cmd("Neotree toggle reveal") end)
+vim.keymap.set("n", "<leader>k", function() vim.cmd("AerialNavToggle") end)
+vim.keymap.set("n", "<leader>ni", function() vim.cmd("Neorg index") end)
+vim.keymap.set("n", "<leader>nr", function() vim.cmd("Neorg return") end)
 
 -- venn.nvim: enable or disable keymappings
 function _G.Toggle_venn()
@@ -56,7 +59,7 @@ vim.api.nvim_set_keymap('n', '<leader>v', ":lua Toggle_venn()<CR>", { noremap = 
 require("config.lazy")
 
 require("nvim-treesitter.configs").setup {
-    ensure_installed = { "python", "lua", "nix" },
+    ensure_installed = { "python", "lua", "nix", "regex", "markdown", "markdown_inline" },
     auto_install = true,
     highlight = {
         enable = true
@@ -79,7 +82,7 @@ cmp.setup({
         -- completion = cmp.config.window.bordered(),
         -- documentation = cmp.config.window.bordered()
     },
-    completion = {callSnippet = "Replace"},
+    -- completion = {callSnippet = "Replace"},
     mapping = cmp.mapping.preset.insert({
       ['<C-b>'] = cmp.mapping.scroll_docs(-4),
       ['<C-f>'] = cmp.mapping.scroll_docs(4),
@@ -89,21 +92,28 @@ cmp.setup({
     }),
     sources = cmp.config.sources({
         { name = "nvim_lsp" },
-        { name = "buffer" },
-        { name = "path"},
         { name = "luasnip" },
-        { name = "nvim_lsp_signature_help" },
-    })
+        { name = "path"},
+        -- { name = "nvim_lsp_signature_help" },
+    }, {
+        { name = "buffer" },
+    }
+    )
 })
 
-local capabilities = require("cmp_nvim_lsp").default_capabilities()
-require("lspconfig")["pyright"].setup {
-    capabilities = capabilities
-}
-require("lspconfig")["nixd"].setup {
-    capabilities = capabilities
-}
-require("lspconfig").nixd.setup({
+-- require("lsp_signature").setup()
+
+local capabilities = require("cmp_nvim_lsp").default_capabilities(vim.lsp.protocol.make_client_capabilities())
+vim.lsp.enable("pyright")
+vim.lsp.enable("nixd")
+vim.lsp.enable("lua_ls")
+
+vim.lsp.config("pyright", {
+    capabilities=capabilities
+})
+
+vim.lsp.config("nixd", {
+    capabilities=capabilities,
     settings = {
         nixd = {
             formatting = {
@@ -112,7 +122,9 @@ require("lspconfig").nixd.setup({
         }
     }
 })
-require("lspconfig")["lua_ls"].setup {
+
+vim.lsp.config("lua_ls", {
+    capabilities=capabilities,
     on_init = function(client)
     if client.workspace_folders then
       local path = client.workspace_folders[1].name
@@ -144,7 +156,49 @@ require("lspconfig")["lua_ls"].setup {
   settings = {
     Lua = {}
   }
-}
+})
+
+-- require("lspconfig")["pyright"].setup {
+--     capabilities = capabilities
+-- }
+-- require("lspconfig")["nixd"].setup {
+--     capabilities = capabilities
+-- }
+-- require("lspconfig").nixd.setup({
+-- })
+-- require("lspconfig")["lua_ls"].setup {
+--     on_init = function(client)
+--     if client.workspace_folders then
+--       local path = client.workspace_folders[1].name
+--       if path ~= vim.fn.stdpath('config') and (vim.uv.fs_stat(path..'/.luarc.json') or vim.uv.fs_stat(path..'/.luarc.jsonc')) then
+--         return
+--       end
+--     end
+--
+--     client.config.settings.Lua = vim.tbl_deep_extend('force', client.config.settings.Lua, {
+--       runtime = {
+--         -- Tell the language server which version of Lua you're using
+--         -- (most likely LuaJIT in the case of Neovim)
+--         version = 'LuaJIT'
+--       },
+--       -- Make the server aware of Neovim runtime files
+--       workspace = {
+--         checkThirdParty = false,
+--         library = {
+--           vim.env.VIMRUNTIME
+--           -- Depending on the usage, you might want to add additional paths here.
+--           -- "${3rd}/luv/library"
+--           -- "${3rd}/busted/library",
+--         }
+--         -- or pull in all of 'runtimepath'. NOTE: this is a lot slower and will cause issues when working on your own configuration (see https://github.com/neovim/nvim-lspconfig/issues/3189)
+--         -- library = vim.api.nvim_get_runtime_file("", true)
+--       }
+--     })
+--   end,
+--   settings = {
+--     Lua = {}
+--   }
+-- }
 
 require("toggleterm").setup{
     open_mapping = [[<C-\>]]
@@ -203,3 +257,75 @@ require("neo-tree").setup({
         }
     }
 })
+
+require("gitsigns").setup({
+    current_line_blame = true,
+
+    on_attach = function(bufnr)
+        local gitsigns = require('gitsigns')
+
+        local function map(mode, l, r, opts)
+            opts = opts or {}
+            opts.buffer = bufnr
+            vim.keymap.set(mode, l, r, opts)
+        end
+
+        -- Navigation
+        map('n', ']c', function()
+            if vim.wo.diff then
+                vim.cmd.normal({']c', bang = true})
+            else
+                gitsigns.nav_hunk('next')
+            end
+        end)
+
+        map('n', '[c', function()
+            if vim.wo.diff then
+                vim.cmd.normal({'[c', bang = true})
+            else
+                gitsigns.nav_hunk('prev')
+            end
+        end)
+
+        map('n', '<leader>hi', gitsigns.preview_hunk_inline)
+    end
+
+})
+
+require("aerial").setup({
+    on_attach = function(bufnr)
+        vim.keymap.set("n", "{", "<cmd>AerialPrev<CR>", { buffer = bufnr })
+        vim.keymap.set("n", "}", "<cmd>AerialNext<CR>", { buffer = bufnr })
+    end,
+})
+
+local actions = require("telescope.actions")
+require("telescope").setup({
+    defaults = {
+        mappings = {
+            i = {
+                ["jk"] = actions.close
+            }
+        },
+        layout_config = {
+            -- height = 0.75,
+            -- width = 0.75
+        }
+    },
+    pickers = {
+        buffers = {
+            sort_mru = true,
+            ignore_current_buffer = true,
+            mappings = {
+                i = {
+                    ["<C-d>"] = actions.delete_buffer + actions.move_to_top
+                }
+            }
+        }
+    }
+})
+local builtin = require('telescope.builtin')
+vim.keymap.set('n', '<leader>ff', builtin.git_files, { desc = 'Telescope find files' })
+vim.keymap.set('n', '<leader>fg', builtin.live_grep, { desc = 'Telescope live grep' })
+vim.keymap.set('n', '<leader>fb', builtin.buffers, { desc = 'Telescope buffers' })
+vim.keymap.set('n', '<leader>fh', builtin.help_tags, { desc = 'Telescope help tags' })
