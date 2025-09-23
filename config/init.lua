@@ -107,6 +107,7 @@ local capabilities = require("cmp_nvim_lsp").default_capabilities(vim.lsp.protoc
 vim.lsp.enable("pyright")
 vim.lsp.enable("nixd")
 vim.lsp.enable("lua_ls")
+vim.lsp.enable("clangd")
 
 vim.lsp.config("pyright", {
     capabilities=capabilities
@@ -157,7 +158,9 @@ vim.lsp.config("lua_ls", {
     Lua = {}
   }
 })
-
+vim.lsp.config("clangd", {
+    capabilities = capabilities
+})
 -- require("lspconfig")["pyright"].setup {
 --     capabilities = capabilities
 -- }
@@ -303,8 +306,8 @@ local actions = require("telescope.actions")
 require("telescope").setup({
     defaults = {
         mappings = {
-            i = {
-                ["jk"] = actions.close
+            n = {
+                ["<leader>fq"] = actions.close
             }
         },
         layout_config = {

@@ -15,11 +15,15 @@ return {
                 }
             },
             presets = {
-                bottom_search = true,
+                bottom_search = false,
                 command_palette = true,
                 long_message_to_split = true,
                 inc_rename = false,
                 lsp_doc_border = false
+            },
+            routes = {
+                view = "notify",
+                filter = { event = "msg_showmode" }
             }
         })
     end
