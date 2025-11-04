@@ -8,5 +8,8 @@ return {
         -- Only one of these is needed.
         "nvim-telescope/telescope.nvim", -- optional
       },
+      opts = {
+          -- graph_style = "kitty"
+      }
     }
 }

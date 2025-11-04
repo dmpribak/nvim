@@ -1,4 +1,5 @@
 vim.opt.number = true
+vim.opt.relativenumber = true
 vim.opt.tabstop = 4
 vim.opt.softtabstop = 4
 vim.opt.expandtab = true
@@ -12,6 +13,26 @@ vim.opt.signcolumn = "yes"
 vim.opt.wrap = false
 vim.cmd("syntax on")
 vim.g.mapleader = " "
+-- vim.g.clipboard = "osc52"
+
+local function paste()
+  return {
+    vim.fn.split(vim.fn.getreg(""), "\n"),
+    vim.fn.getregtype(""),
+  }
+end
+
+vim.g.clipboard = {
+  name = "OSC 52",
+  copy = {
+    ["+"] = require("vim.ui.clipboard.osc52").copy("+"),
+    ["*"] = require("vim.ui.clipboard.osc52").copy("*"),
+  },
+  paste = {
+    ["+"] = paste,
+    ["*"] = paste,
+  },
+}
 
 -- Keybinds --
 vim.keymap.set({"i", "t"}, "jk", "<C-\\><C-n>")
@@ -59,7 +80,7 @@ vim.api.nvim_set_keymap('n', '<leader>v', ":lua Toggle_venn()<CR>", { noremap = 
 require("config.lazy")
 
 require("nvim-treesitter.configs").setup {
-    ensure_installed = { "python", "lua", "nix", "regex", "markdown", "markdown_inline" },
+    ensure_installed = { "python", "lua", "nix", "regex", "markdown", "markdown_inline", "rust" },
     auto_install = true,
     highlight = {
         enable = true
@@ -69,6 +90,7 @@ require("nvim-treesitter.configs").setup {
 vim.lsp.enable("pyright")
 vim.lsp.enable("nixd")
 vim.lsp.enable("lua_ls")
+vim.lsp.enable("rust_analyzer")
 
 local cmp = require("cmp")
 

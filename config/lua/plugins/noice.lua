@@ -24,6 +24,13 @@ return {
             routes = {
                 view = "notify",
                 filter = { event = "msg_showmode" }
+            },
+            views = {
+                notify = {
+                    config = {
+                        max_width = 60
+                    }
+                }
             }
         })
     end

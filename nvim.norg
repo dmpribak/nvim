@@ -1,0 +1,44 @@
+* Keybinds
+** Normal Mode
+   - \<C-w\>d       Diagnostics
+   - \<C-]\>        Follow link
+   - g;           Jump to last edit
+   - grn          Rename symbol in buffer
+   - K            Display "hover" info panel
+   - gww          Reflow line
+   - ]b           Next buffer
+   - \[b           Previous buffer
+   - ``           Go to position before last jump
+   - fx           Jump to next occurence of character x
+   - Fx           Jump backwards to next occurence of character x
+   - tx           Jump before next occurence of character x
+   - Tx           Jump backwards before next occurence of character x
+   - \<C-a\>        Increment number
+   - \<C-x\>        Decrement number
+   - \<leader\>hi   Preview git hunk
+   - \]c           Jump to next git change
+   - \[c           Jump to previous git change
+   - ys\{motion\}(  Surround motion with ( ) with a space inside
+   - ys\{motion\})  Surround motion with () with no spaces
+   - ds(          Delete surrounding ()
+   - cs({         Change sourrounding () to \{\}
+
+** Insert Mode
+   - \<C-r\>a       Insert contents of register a
+
+** Visual Mode
+   - =            Fix indentation
+   - Sa           Surround selection with character a
+
+** Visual Block Mode
+   - \<S-i\>        Insert at the start of the selection on each line
+   - \<S-a\>        Append at the end of the selection on each line
+
+** Telescope
+   - \<C-v\>        Open in vertical split
+
+* Commands
+  - :noh                Stop highlighting search results
+  - :Lazy               Package manager
+  - :e#                 Return to previous buffer
+  - :s/\\v(\\d+).+/\\1     \\v enables all regex notation in pattern. \\1 expands to capture group 1.
